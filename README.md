@@ -25,7 +25,7 @@ This project is part of the ES335 course at the Indian Institute of Technology, 
 
 1. Clone this repository:
     ```bash
-    git clone https://github.com/yourusername/ES335_gradient_thinkers.git
+    git clone https://github.com/AshStorm17/ES335_gradient_thinkers.git
     ```
 2. Navigate to the project directory:
     ```bash
