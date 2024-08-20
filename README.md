@@ -31,7 +31,15 @@ This project is part of the ES335 course at the Indian Institute of Technology, 
     ```bash
     cd ES335_gradient_thinkers
     ```
-3. Install the required dependencies:
+3. Recommended: <br>
+    Make a virtual environment
+    ```bash
+    python -m venv .venv 
+    ```
+    ```bash
+    .venv\Scripts\activate
+    ```
+4. Install the required dependencies:
     ```bash
     pip install -r requirements.txt
     ```
