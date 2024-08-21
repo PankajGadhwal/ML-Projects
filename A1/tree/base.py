@@ -9,12 +9,22 @@ You will be expected to use this to make trees for:
 from dataclasses import dataclass
 from typing import Literal
 
+import graphviz
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from tree.utils import *
 
 np.random.seed(42)
+
+
+@dataclass
+class TreeNode:
+    feature: str = None
+    threshold: float = None
+    left: 'TreeNode' = None
+    right: 'TreeNode' = None
+    value: any = None
 
 
 @dataclass
@@ -43,6 +53,7 @@ class DecisionTree:
         """
 
         # Traverse the tree you constructed to return the predicted values for the given test inputs.
+
 
         pass
 
