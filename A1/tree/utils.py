@@ -41,6 +41,7 @@ def entropy(Y: pd.Series) -> float:
     
     label_encoder = LabelEncoder()
     encoded_Y = label_encoder.fit_transform(Y)
+    
     value_counts = np.bincount(encoded_Y)
     return scipy_entropy(value_counts, base=2)
 
