@@ -39,12 +39,14 @@ for category in os.listdir(test_dir):
                 if headers is None:
                     headers = pd.read_csv(file_path, nrows=1).columns.tolist()
                 df = pd.read_csv(file_path)
-                X_test.append(df.values)
-                y_test.extend([category] * len(df))
+                X_test.append(df.values) 
+                y_test.extend([category] * len(df)) 
 
 X_test = np.vstack(X_test)
-y_test = np.array(y_test)
+y_test = np.array(y_test) 
 
 print("Headers: ", headers)
 print("Training data shape: ", X_train.shape)
-print("Testing data shape: ", y_train.shape)
+print("Testing data shape: ", X_test.shape) 
+print("Training labels shape: ", y_train.shape)
+print("Testing labels shape: ", y_test.shape)
