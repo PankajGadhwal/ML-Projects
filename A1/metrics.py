@@ -14,33 +14,53 @@ def accuracy(y_hat: pd.Series, y: pd.Series) -> float:
     """
     assert y_hat.size == y.size
     # TODO: Write here
-    pass
+    correct_predictions = (y_hat == y).sum()
+    accuracy = correct_predictions / y.size
+    
+    return accuracy
 
 
 def precision(y_hat: pd.Series, y: pd.Series, cls: Union[int, str]) -> float:
     """
     Function to calculate the precision
     """
-    pass
+    assert y_hat.size == y.size
+    true_positive = ((y_hat == cls) & (y == cls)).sum()
+    predicted_positive = (y_hat == cls).sum()
+    
+    if predicted_positive == 0:
+        return 0.0  
+    
+    precision = true_positive / predicted_positive
+    return precision
 
 
 def recall(y_hat: pd.Series, y: pd.Series, cls: Union[int, str]) -> float:
     """
     Function to calculate the recall
     """
-    pass
+    assert y_hat.size == y.size
+    true_positive = ((y_hat == cls) & (y == cls)).sum()
+    total_positive = (y==cls).sum()
+    if(total_positive ==0 ):
+        return 0.0
+    
+    recall = true_positive/total_positive
 
 
 def rmse(y_hat: pd.Series, y: pd.Series) -> float:
     """
     Function to calculate the root-mean-squared-error(rmse)
     """
-
-    pass
+    assert y_hat.size == y.size
+    return (((y-y_hat)**2).mean())**0.5
+    
 
 
 def mae(y_hat: pd.Series, y: pd.Series) -> float:
     """
     Function to calculate the mean-absolute-error(mae)
     """
-    pass
+    assert y_hat.size == y.size
+    return abs(y-y_hat).mean()
+    

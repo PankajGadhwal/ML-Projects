@@ -16,7 +16,7 @@ def one_hot_encoding(X: pd.DataFrame) -> pd.DataFrame:
     Function to perform one hot encoding on the input data
     """
 
-    encoder = OneHotEncoder(drop='first', sparse=False)
+    encoder = OneHotEncoder(drop='first', sparse_output=False)
     encoded = encoder.fit_transform(X)
     
     encoded_df = pd.DataFrame(encoded, columns=encoder.get_feature_names_out(X.columns))
@@ -27,6 +27,9 @@ def check_ifreal(y: pd.Series) -> bool:
     """
     Function to check if the given series has real or discrete values
     """
+    if pd.api.types.is_categorical_dtype(y):
+        # If y is categorical, it's not real-valued
+        return False
 
     return np.issubdtype(y.dtype, np.floating)
 
