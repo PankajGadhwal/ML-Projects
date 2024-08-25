@@ -41,6 +41,7 @@ def entropy(Y: pd.Series) -> float:
     
     label_encoder = LabelEncoder()
     encoded_Y = label_encoder.fit_transform(Y)
+    
     value_counts = np.bincount(encoded_Y)
     return scipy_entropy(value_counts, base=2)
 
@@ -59,11 +60,14 @@ def gini_index(Y: pd.Series) -> float:
     probabilities = value_counts / len(Y)
     return 1.0 - np.sum(probabilities ** 2)
 
+def mse(Y: pd.Series):
+    return np.mean((Y - Y.mean()) ** 2)
+                   
 def mse_gain(Y: pd.Series, groups_list: list):
-    total_mse = np.mean((Y - Y.mean()) ** 2)
+    total_mse = mse(Y)
     weighted_mse = 0.0
     for group in groups_list:
-        weighted_mse += (len(group) / len(Y)) * np.mean((Y.loc[group] - Y.loc[group].mean()) ** 2)
+        weighted_mse += (len(group) / len(Y)) * mse(Y.loc[group])
     return total_mse - weighted_mse       
 
 def info_gain(Y: pd.Series, groups_list: list, criterion: str) -> float:
@@ -140,7 +144,7 @@ def opt_split_attribute(X: pd.DataFrame, y: pd.Series, criterion, features: pd.S
 
                 else:  # real output
                     min_mse = float('inf')
-                    weighted_mse = ((len(x_less)/len(X[i])) * mse_gain(y_less)) + ((len(x_greater)/len(X[i])) * mse_gain(y_greater))
+                    weighted_mse = ((len(x_less)/len(X[i])) * mse(y_less)) + ((len(x_greater)/len(X[i])) * mse(y_greater))
                     if weighted_mse < min_mse:
                        min_mse = weighted_mse
                        best_attribute = i
@@ -166,9 +170,9 @@ def split_data(X: pd.DataFrame, y: pd.Series, attribute, value):
         # Real
         x_less = X[X[attribute] <= value].drop(columns=[attribute])
         y_less = y[X[attribute] <= value]
-        X_greater = X[X[attribute] > value].drop(columns=[attribute])
+        x_greater = X[X[attribute] > value].drop(columns=[attribute])
         y_greater = y[X[attribute] > value]
-        return x_less, y_less, X_greater, y_greater
+        return x_less, y_less, x_greater, y_greater
     
     else:
         # Discrete
