@@ -61,28 +61,30 @@ class DecisionTree:
 
         # real input
         if check_ifreal(X.iloc[:,0]):
-                
+            self.case = 0    
             best_feature, split_value = opt_split_attribute(X, y, self.criterion, X.columns)
             curr = RealNode(best_feature,split_value)
             x_less,y_less,x_greater,y_greater = split_data(X,y,best_feature,split_value)
             curr.daughter['Less than'] = self.fit(x_less,y_less,current_depth+1)
             curr.daughter['Greater than'] = self.fit(x_greater,y_greater,current_depth+1)
 
-            curr.daughter['default'] = y.mean()
+            if check_ifreal(y) : curr.daughter['default'] = y.mean()
+            else : curr.daughter['default'] = y.mode()[0]
             if current_depth == 0 : self.root = curr
             return curr
 
         # discrete input
         else:
-               
+            self.case = 1  
             best_feature, split_value = opt_split_attribute(X, y, self.criterion, X.columns)
             curr = DiscreteNode(best_feature)
             splits = split_data(X,y,best_feature,split_value)
             for i in splits:
                  curr.daughter[i[2]] = self.fit(i[0],i[1],current_depth+1)
 
+            if check_ifreal(y) : curr.daughter['default'] = y.mean()
+            else : curr.daughter['default'] = y.mode()[0]
             if current_depth == 0 : self.root = curr
-            curr.daughter['default'] = y.mode()[0]
             return curr
             
 
@@ -111,10 +113,9 @@ class DecisionTree:
         return pd.Series(series, index=X.index, name='Prediction')
 
 
-
     def plot(self) -> None:
         """
-        Function to plot the tree
+        Function to plot the tree.
 
         Output Example:
         ?(X1 > 4)
@@ -124,4 +125,31 @@ class DecisionTree:
             N: Class C
         Where Y => Yes and N => No
         """
-        pass
+
+        def print_tree(node, indent):
+            if isinstance(node, RealNode):
+                # Print the decision rule for real-valued features
+                print(f'{" " * indent}?({node.feature} > {node.split_value})')
+                print_tree(node.daughter['Less than'], indent + 4)
+                print(f'{" " * indent}N: ')
+                print_tree(node.daughter['Greater than'], indent + 4)
+                
+            elif isinstance(node, DiscreteNode):
+                # Print the decision rule for discrete features
+                print(f'{" " * indent}?{node.feature}')
+                for key, child_node in node.daughter.items():
+                    if key != 'default':  
+                        print(f'{" " * indent}{key}: ')
+                        print_tree(child_node, indent + 4)
+                if 'default' in node.daughter:
+                    print(f'{" " * indent}default: {node.daughter["default"]}')
+
+            else:
+                # Print the leaf node value
+                print(f'{" " * indent}Class: {node}')
+
+        if self.root is None:
+            print("The tree is empty.")
+        else:
+            print_tree(self.root, 0)
+
