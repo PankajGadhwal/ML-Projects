@@ -42,11 +42,9 @@ def entropy(Y: pd.Series) -> float:
     if check_ifreal(Y):
         raise ValueError("Entropy is typically used for discrete values, not continuous.")
     
-    label_encoder = LabelEncoder()
-    encoded_Y = label_encoder.fit_transform(Y)
-    
-    value_counts = np.bincount(encoded_Y)
-    return scipy_entropy(value_counts, base=2)
+    probabilities = Y.value_counts()/len(Y)
+    probabilities = probabilities.replace(0, 1e-100)
+    return -np.sum(probabilities * np.log2(probabilities))
 
 
 def gini_index(Y: pd.Series) -> float:
@@ -57,11 +55,9 @@ def gini_index(Y: pd.Series) -> float:
     if check_ifreal(Y):
         raise ValueError("Gini index is typically used for discrete values, not continuous.")
 
-    label_encoder = LabelEncoder()
-    encoded_Y = label_encoder.fit_transform(Y)
-    value_counts = np.bincount(encoded_Y)
-    probabilities = value_counts / len(Y)
-    return 1.0 - np.sum(probabilities ** 2)
+    probabilities = Y.value_counts()/len(Y)
+    gini = 1 - sum((i ** 2) for i in probabilities)
+    return gini
 
 def mse(Y: pd.Series):
     return np.mean((Y - Y.mean()) ** 2)

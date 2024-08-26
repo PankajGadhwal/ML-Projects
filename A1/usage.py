@@ -28,10 +28,6 @@ for criteria in ["information_gain", "gini_index"]:
     tree.fit(X, y, 0)
     y_hat = tree.predict(X)
     tree.plot()
-    try:
-        tree.visualize_tree()
-    except AttributeError as e:
-        print(f"AttributeError: {e}")
     print("Criteria :", criteria)
     print("RMSE: ", rmse(y_hat, y))
     print("MAE: ", mae(y_hat, y))
@@ -49,10 +45,6 @@ for criteria in ["information_gain", "gini_index"]:
     tree.fit(X, y, 0)
     y_hat = tree.predict(X)
     tree.plot()
-    try:
-        tree.visualize_tree()
-    except AttributeError as e:
-        print(f"AttributeError: {e}")
     print("Criteria :", criteria)
     print("Accuracy: ", accuracy(y_hat, y))
     for cls in y.unique():
@@ -73,10 +65,6 @@ for criteria in ["information_gain", "gini_index"]:
     tree.fit(X, y,0)
     y_hat = tree.predict(X)
     tree.plot()
-    try:
-        tree.visualize_tree()
-    except AttributeError as e:
-        print(f"AttributeError: {e}")
     print("Criteria :", criteria)
     print("Accuracy: ", accuracy(y_hat, y))
     for cls in y.unique():
@@ -96,10 +84,6 @@ for criteria in ["information_gain", "gini_index"]:
     tree.fit(X, y,0)
     y_hat = tree.predict(X)
     tree.plot()
-    try:
-        tree.visualize_tree()
-    except AttributeError as e:
-        print(f"AttributeError: {e}")
     print("Criteria :", criteria)
     print("RMSE: ", rmse(y_hat, y))
     print("MAE: ", mae(y_hat, y))
