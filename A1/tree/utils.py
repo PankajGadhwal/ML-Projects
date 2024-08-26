@@ -112,20 +112,22 @@ def opt_split_attribute(X: pd.DataFrame, y: pd.Series, criterion, features: pd.S
 
     # discrete input
     if(check_ifreal(X.iloc[:,0])==0):
-        informations = []
+        best_gain = -float('inf')
         for i in X.columns:
             groups = []
             for j in X[i].unique():
                 groups.append(X.index[X[i] == j])
 
-                if(check_ifreal(y)==0): # discrete output
-                    informations.append(info_gain(y,groups,criterion))
-                else :  # real output
-                    informations.append(mse_gain(y,groups))
+            if(check_ifreal(y)==0): # discrete output
+                curr_gain = info_gain(y,groups,criterion)
+            else :  # real output
+                curr_gain = mse_gain(y,groups)
                     
-            best_attribute = X.columns[np.argmax(informations)]
-            best_split_value = -1  # threshold split value not used for discrete inputs
-
+            if curr_gain > best_gain:
+                       best_gain = curr_gain
+                       best_attribute = i
+                       best_split_value = -1  # threshold split value not used for discrete inputs
+            
     # real input
     else:
         for i in X.columns:
@@ -153,7 +155,8 @@ def opt_split_attribute(X: pd.DataFrame, y: pd.Series, criterion, features: pd.S
                        best_attribute = i
                        best_split_value = curr_split_value
         
-        return best_attribute, best_split_value
+        
+    return best_attribute, best_split_value
 
 
 def split_data(X: pd.DataFrame, y: pd.Series, attribute, value):

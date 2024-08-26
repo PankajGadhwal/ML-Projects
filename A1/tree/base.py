@@ -153,27 +153,53 @@ class DecisionTree:
         else:
             print_tree(self.root, 0)
     
-    def visualize_tree(self, graph=None, parent_id=None, connection_label=None):
+    import graphviz
 
+    def visualize_tree(self, graph=None, parent_id=None, connection_label=None):
+        # Initialize the graph if not provided
         if graph is None:
             graph = graphviz.Digraph(format='png')
-
-        current_label = self.feature
-
-        graph.node(str(id(self)), current_label, shape=self.shape)
-
-        if hasattr(self, 'decision') and self.decision is not None:
-            current_label += f"\nDecision: {self.decision}"
-    
-        if parent_id is not None:
-            if connection_label is not None:
-                graph.edge(str(parent_id), str(id(self)), label=connection_label)
+        
+        # Define a function to recursively visualize nodes
+        def add_node(node, parent_id=None, connection_label=None):
+            if isinstance(node, RealNode):
+                label = f"{node.feature} <= {node.split_value:.2f}"
+                node_id = f"node_{id(node)}"
+                graph.node(node_id, label, shape='box')
+                if parent_id is not None:
+                    graph.edge(parent_id, node_id, label=connection_label if connection_label else '')
+                # Add children nodes
+                add_node(node.daughter['Less than'], node_id, 'Less than')
+                add_node(node.daughter['Greater than'], node_id, 'Greater than')
+                
+            elif isinstance(node, DiscreteNode):
+                label = f"{node.feature}"
+                node_id = f"node_{id(node)}"
+                graph.node(node_id, label, shape='box')
+                if parent_id is not None:
+                    graph.edge(parent_id, node_id, label=connection_label if connection_label else '')
+                # Add children nodes
+                for key, child_node in node.daughter.items():
+                    if key != 'default':
+                        add_node(child_node, node_id, key)
+                # Handle default case
+                if 'default' in node.daughter:
+                    default_id = f"node_default_{id(node)}"
+                    graph.node(default_id, f"Class: {node.daughter['default']}", shape='ellipse')
+                    graph.edge(node_id, default_id, label='default')
+            
             else:
-                graph.edge(str(parent_id), str(id(self)))
+                # Leaf node
+                node_id = f"node_{id(node)}"
+                graph.node(node_id, f"Class: {node}", shape='ellipse')
+                if parent_id is not None:
+                    graph.edge(parent_id, node_id, label=connection_label if connection_label else '')
 
-        if hasattr(self, 'children'):
-            for child in self.children:
-                child.visualize_tree(graph, str(id(self)), connection_label=str(child.val))
+        # Start visualization from the root node
+        if self.root is None:
+            print("The tree is empty.")
+        else:
+            add_node(self.root)
+            graph.render(view=True)
 
-        return graph
 
