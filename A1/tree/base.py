@@ -152,4 +152,28 @@ class DecisionTree:
             print("The tree is empty.")
         else:
             print_tree(self.root, 0)
+    
+    def visualize_tree(self, graph=None, parent_id=None, connection_label=None):
+
+        if graph is None:
+            graph = graphviz.Digraph(format='png')
+
+        current_label = self.feature
+
+        graph.node(str(id(self)), current_label, shape=self.shape)
+
+        if hasattr(self, 'decision') and self.decision is not None:
+            current_label += f"\nDecision: {self.decision}"
+    
+        if parent_id is not None:
+            if connection_label is not None:
+                graph.edge(str(parent_id), str(id(self)), label=connection_label)
+            else:
+                graph.edge(str(parent_id), str(id(self)))
+
+        if hasattr(self, 'children'):
+            for child in self.children:
+                child.visualize_tree(graph, str(id(self)), connection_label=str(child.val))
+
+        return graph
 
