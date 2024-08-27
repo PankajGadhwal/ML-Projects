@@ -6,7 +6,7 @@ from tree.base import DecisionTree
 from metrics import *
 
 np.random.seed(42)
-num_average_time = 1  # Number of times to run each experiment to calculate the average values
+num_average_time = 3  # Number of times to run each experiment to calculate the average values
 
 # Function to create fake data (take inspiration from usage.py)
 # ...
