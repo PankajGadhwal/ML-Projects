@@ -126,6 +126,12 @@ def opt_split_attribute(X: pd.DataFrame, y: pd.Series, criterion, features: pd.S
             
     # real input
     else:
+
+        if(check_ifreal(y)==0):  # discrete output
+                best_gain = -float('inf')
+        else:   # real output
+                min_mse = float('inf')
+
         for i in X.columns:
             sorted_values = sorted(X[i].unique())
             for j in range(1, len(sorted_values)):
@@ -136,7 +142,6 @@ def opt_split_attribute(X: pd.DataFrame, y: pd.Series, criterion, features: pd.S
                 y_greater = y[X[i] > curr_split_value]
 
                 if(check_ifreal(y)==0):  # discrete output
-                    best_gain = -float('inf')
                     gain = info_gain(y,[y_greater.index,y_less.index],criterion)
                     if gain > best_gain:
                        best_gain = gain
@@ -144,7 +149,6 @@ def opt_split_attribute(X: pd.DataFrame, y: pd.Series, criterion, features: pd.S
                        best_split_value = curr_split_value
 
                 else:  # real output
-                    min_mse = float('inf')
                     weighted_mse = ((len(x_less)/len(X[i])) * mse(y_less)) + ((len(x_greater)/len(X[i])) * mse(y_greater))
                     if weighted_mse < min_mse:
                        min_mse = weighted_mse
@@ -170,9 +174,9 @@ def split_data(X: pd.DataFrame, y: pd.Series, attribute, value):
     # Split the data based on a particular value of a particular attribute. You may use masking as a tool to split the data.
     if check_ifreal(X[attribute]):
         # Real
-        x_less = X[X[attribute] <= value].drop(columns=[attribute])
+        x_less = X[X[attribute] <= value]
         y_less = y[X[attribute] <= value]
-        x_greater = X[X[attribute] > value].drop(columns=[attribute])
+        x_greater = X[X[attribute] > value]
         y_greater = y[X[attribute] > value]
         return x_less, y_less, x_greater, y_greater
     

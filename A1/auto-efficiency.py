@@ -40,7 +40,7 @@ predictions = decisiontree.predict(X_test)
 
 # using decision tree module from scikit learn
 scikitdecisiontree = DecisionTreeClassifier(criterion="entropy")  
-scikitdecisiontree.fit(X_train, y_train,0)
+scikitdecisiontree.fit(X_train, y_train)
 scikit_predictions = scikitdecisiontree.predict(X_test)
 
 print(f"Our decision tree accuracy: {accuracy(predictions, y_test)}")
@@ -49,3 +49,4 @@ print(f"Our decision tree Precision: {precision(predictions, y_test, cls=1)}")
 print(f"Scikit learn decision tree Precision: {precision(scikit_predictions, y_test, cls=1)}")
 print(f"Our decision tree Recall: {recall(predictions, y_test, cls=1)}")
 print(f"Scikit learn decision tree Recall: {recall(scikit_predictions, y_test, cls=1)}")
+

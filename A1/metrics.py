@@ -46,6 +46,7 @@ def recall(y_hat: pd.Series, y: pd.Series, cls: Union[int, str]) -> float:
         return 0.0
     
     recall = true_positive/total_positive
+    return recall
 
 
 def rmse(y_hat: pd.Series, y: pd.Series) -> float:
