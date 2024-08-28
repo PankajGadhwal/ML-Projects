@@ -42,11 +42,9 @@ def entropy(Y: pd.Series) -> float:
     if check_ifreal(Y):
         raise ValueError("Entropy is typically used for discrete values, not continuous.")
     
-    label_encoder = LabelEncoder()
-    encoded_Y = label_encoder.fit_transform(Y)
-    
-    value_counts = np.bincount(encoded_Y)
-    return scipy_entropy(value_counts, base=2)
+    probabilities = Y.value_counts()/len(Y)
+    probabilities = probabilities.replace(0, 1e-100)
+    return -np.sum(probabilities * np.log2(probabilities))
 
 
 def gini_index(Y: pd.Series) -> float:
@@ -57,11 +55,9 @@ def gini_index(Y: pd.Series) -> float:
     if check_ifreal(Y):
         raise ValueError("Gini index is typically used for discrete values, not continuous.")
 
-    label_encoder = LabelEncoder()
-    encoded_Y = label_encoder.fit_transform(Y)
-    value_counts = np.bincount(encoded_Y)
-    probabilities = value_counts / len(Y)
-    return 1.0 - np.sum(probabilities ** 2)
+    probabilities = Y.value_counts()/len(Y)
+    gini = 1 - sum((i ** 2) for i in probabilities)
+    return gini
 
 def mse(Y: pd.Series):
     return np.mean((Y - Y.mean()) ** 2)
@@ -112,22 +108,30 @@ def opt_split_attribute(X: pd.DataFrame, y: pd.Series, criterion, features: pd.S
 
     # discrete input
     if(check_ifreal(X.iloc[:,0])==0):
-        informations = []
+        best_gain = -float('inf')
         for i in X.columns:
             groups = []
             for j in X[i].unique():
                 groups.append(X.index[X[i] == j])
 
-                if(check_ifreal(y)==0): # discrete output
-                    informations.append(info_gain(y,groups,criterion))
-                else :  # real output
-                    informations.append(mse_gain(y,groups))
+            if(check_ifreal(y)==0): # discrete output
+                curr_gain = info_gain(y,groups,criterion)
+            else :  # real output
+                curr_gain = mse_gain(y,groups)
                     
-            best_attribute = X.columns[np.argmax(informations)]
-            best_split_value = -1  # threshold split value not used for discrete inputs
-
+            if curr_gain > best_gain:
+                       best_gain = curr_gain
+                       best_attribute = i
+                       best_split_value = -1  # threshold split value not used for discrete inputs
+            
     # real input
     else:
+
+        if(check_ifreal(y)==0):  # discrete output
+                best_gain = -float('inf')
+        else:   # real output
+                min_mse = float('inf')
+
         for i in X.columns:
             sorted_values = sorted(X[i].unique())
             for j in range(1, len(sorted_values)):
@@ -138,7 +142,6 @@ def opt_split_attribute(X: pd.DataFrame, y: pd.Series, criterion, features: pd.S
                 y_greater = y[X[i] > curr_split_value]
 
                 if(check_ifreal(y)==0):  # discrete output
-                    best_gain = -float('inf')
                     gain = info_gain(y,[y_greater.index,y_less.index],criterion)
                     if gain > best_gain:
                        best_gain = gain
@@ -146,14 +149,14 @@ def opt_split_attribute(X: pd.DataFrame, y: pd.Series, criterion, features: pd.S
                        best_split_value = curr_split_value
 
                 else:  # real output
-                    min_mse = float('inf')
                     weighted_mse = ((len(x_less)/len(X[i])) * mse(y_less)) + ((len(x_greater)/len(X[i])) * mse(y_greater))
                     if weighted_mse < min_mse:
                        min_mse = weighted_mse
                        best_attribute = i
                        best_split_value = curr_split_value
         
-        return best_attribute, best_split_value
+        
+    return best_attribute, best_split_value
 
 
 def split_data(X: pd.DataFrame, y: pd.Series, attribute, value):
@@ -171,9 +174,9 @@ def split_data(X: pd.DataFrame, y: pd.Series, attribute, value):
     # Split the data based on a particular value of a particular attribute. You may use masking as a tool to split the data.
     if check_ifreal(X[attribute]):
         # Real
-        x_less = X[X[attribute] <= value].drop(columns=[attribute])
+        x_less = X[X[attribute] <= value]
         y_less = y[X[attribute] <= value]
-        x_greater = X[X[attribute] > value].drop(columns=[attribute])
+        x_greater = X[X[attribute] > value]
         y_greater = y[X[attribute] > value]
         return x_less, y_less, x_greater, y_greater
     
