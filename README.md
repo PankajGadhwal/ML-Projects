@@ -11,7 +11,7 @@ All the assignments have been done in folders with the name A 'assignment number
 - **Aashmun Gupta** (22110005)
 - **Pankaj** (22110177)
 - **Ishva Patel** (21110082)
-- **Rahul Khichar** (23110264)
+- **Dhruv Sharma** (2211074)
 
 ## Installation and Setup
 
