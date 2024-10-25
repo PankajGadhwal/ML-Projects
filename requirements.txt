@@ -7,3 +7,5 @@ tsfel==0.1.7
 seaborn==0.13.2
 langchain_groq==0.1.9
 python-dotenv==1.0.1
+streamlit==1.39.0
+torch==2.5.0
