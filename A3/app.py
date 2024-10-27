@@ -5,7 +5,7 @@ import torch.nn as nn
 from nltk.tokenize import word_tokenize
 
 # Load the trained model
-with open('model.pkl', 'rb') as f:
+with open('mlp_text_generator.pkl', 'rb') as f:
     model = pickle.load(f)
 
 # Load the vocabulary
