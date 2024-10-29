@@ -5,6 +5,8 @@ import torch.nn as nn
 import nltk
 import json
 
+nltk.download('punkt')
+
 class RNNTextGenerator(nn.Module):
     def __init__(self, vocab_size, embedding_dim, hidden_dim):
         super(RNNTextGenerator, self).__init__()
@@ -18,8 +20,8 @@ class RNNTextGenerator(nn.Module):
         x = self.fc(x[:, -1, :])
         return x
     
-model_path = "rnn_text_generator.pkl"
-vocab_path = "vocab.json"
+model_path = "A3/rnn_text_generator.pkl"
+vocab_path = "A3/vocab.json"
 
 with open(model_path, "rb") as f:
     model = pickle.load(f)
