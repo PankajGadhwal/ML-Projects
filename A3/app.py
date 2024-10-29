@@ -20,8 +20,8 @@ class RNNTextGenerator(nn.Module):
         x = self.fc(x[:, -1, :])
         return x
     
-model_path = "rnn_text_generator.pkl"
-vocab_path = "vocab.json"
+model_path = "A3/rnn_text_generator.pkl"
+vocab_path = "A3/vocab.json"
 
 with open(model_path, "rb") as f:
     model = pickle.load(f)
