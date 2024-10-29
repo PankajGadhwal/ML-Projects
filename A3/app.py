@@ -3,46 +3,61 @@ import pickle
 import torch
 import torch.nn as nn
 from nltk.tokenize import word_tokenize
+import json
 
-# Load the trained model
-with open('model.pkl', 'rb') as f:
-    model = pickle.load(f)
+class RNNTextGenerator(nn.Module):
+    def __init__(self, vocab_size, embedding_dim, hidden_dim):
+        super(RNNTextGenerator, self).__init__()
+        self.embedding = nn.Embedding(vocab_size, embedding_dim)
+        self.rnn = nn.LSTM(embedding_dim, hidden_dim,batch_first=True)
+        self.fc = nn.Linear(hidden_dim, vocab_size)
 
-# Load the vocabulary
-with open('vocab.json', 'r') as f:
-    vocab = json.load(f)
-
-# Create index-to-word mapping
-idx_to_word = {i: word for word, i in vocab.items()}
-
-# Define the prediction function
-def predict_next_words(model, user_input, vocab, idx_to_word, context_length, num_predictions):
-    # Tokenize user input
-    user_tokens = word_tokenize(user_input.lower())
+    def forward(self, x):
+        x = self.embedding(x)
+        x, _ = self.rnn(x) 
+        x = self.fc(x[:, -1, :])
+        return x
     
-    if len(user_tokens) >= context_length:
-        input_sequence = [vocab[word] for word in user_tokens[-context_length:]]
-        input_tensor = torch.tensor(input_sequence, dtype=torch.long).unsqueeze(0)  # Reshape for batch
+model_path = "rnn_text_generator.pkl"
+vocab_path = "vocab.json"
+
+# Load the model
+with open(model_path, "rb") as f:
+    model = pickle.load(f)
+model.eval()  
+
+with open(vocab_path, "r") as f:
+    vocab_data = json.load(f)
+    print(vocab_data)  
+word_to_idx = vocab_data["word_to_idx"]
+idx_to_word = vocab_data["idx_to_word"]
+
+def predict_next_k_words(model, sentence, word_to_idx, idx_to_word, context_length, k=1):
+    words = sentence.lower().split()
+    predicted_words = []
+    if len(words) < context_length:
+        words = ['padding'] * (context_length - len(words)) + words
+    
+    for _ in range(k):
+        input_indices = [word_to_idx.get(word, word_to_idx['unknown token']) for word in words[-context_length:]]
+        input_tensor = torch.tensor([input_indices], dtype=torch.long)
+
         with torch.no_grad():
-            model.eval()
             output = model(input_tensor)
-            _, predicted_idx = torch.topk(output, num_predictions, dim=1)
-            predicted_words = [idx_to_word[idx] for idx in predicted_idx[0].tolist()]
-        return predicted_words
-    else:
-        return ["Not enough input for prediction."]
+            predicted_idx = torch.argmax(output, dim=-1).item()
+            predicted_word = idx_to_word[predicted_idx]
 
-# Streamlit app title
+        predicted_words.append(predicted_word)
+        words.append(predicted_word)
+        
+    return predicted_words
+
 st.title("Next-Word Prediction App")
+st.write("Enter a sentence and select the number of words you'd like the model to predict.")
+sentence = st.text_input("Enter the starting sentence:", value="I want to say you")
+k = st.slider("Select the number of words to predict (k):", min_value=1, max_value=10, value=3)
 
-# Sidebar for parameters
-context_length = st.sidebar.slider("Context Length", 2, 10, value=5)
-num_predictions = st.sidebar.slider("Number of Words to Predict", 1, 10, value=5)
-
-# User input
-user_input = st.text_input("Enter a sentence:", "This is an example.")
-
-# Prediction logic
-if st.button("Predict"):
-    predicted_words = predict_next_words(model, user_input, vocab, idx_to_word, context_length, num_predictions)
-    st.write(f"Predicted next words: {', '.join(predicted_words)}")
+if st.button("Predict Next Words"):
+    # Predict and display the result
+    predicted_words = predict_next_k_words(model, sentence, word_to_idx, idx_to_word, context_length=5, k=k)
+    st.write(f"The next {k} words are: {' '.join(predicted_words)}")
