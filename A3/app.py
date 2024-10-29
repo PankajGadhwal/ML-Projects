@@ -6,6 +6,7 @@ import nltk
 import json
 
 nltk.download('punkt')
+nltk.download('punkt_tab')
 
 class RNNTextGenerator(nn.Module):
     def __init__(self, vocab_size, embedding_dim, hidden_dim):
